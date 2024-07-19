@@ -16,6 +16,12 @@ function add(numbers: string): number {
   // Filter out any NaN values that may result from parsing non-numeric strings
   const filteredNumbers = numberArray.filter(num => !isNaN(num));
 
+  // Check for negative numbers
+  const negativeNumbers = filteredNumbers.filter(num => num < 0);
+  if (negativeNumbers.length > 0) {
+      throw new Error(`negative numbers not allowed: ${negativeNumbers.join(', ')}`);
+  }
+
   return filteredNumbers.reduce((sum, num) => sum + num, 0);
 }
 
@@ -30,3 +36,13 @@ console.log(add("1\n2\n3\n4,5")); // Output: 15
 console.log(add("//;\n1;2")); // Output: 3
 console.log(add("//|\n1|2|3")); // Output: 6
 console.log(add("//sep\n2sep3")); // Output: 5
+try {
+  console.log(add("1,-2,3")); // Throws error: negative numbers not allowed: -2
+} catch (e) {
+  console.error(e.message);
+}
+try {
+  console.log(add("1,-2,-3,4")); // Throws error: negative numbers not allowed: -2, -3
+} catch (e) {
+  console.error(e.message);
+}
