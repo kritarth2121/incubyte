@@ -22,7 +22,10 @@ function add(numbers: string): number {
       throw new Error(`negative numbers not allowed: ${negativeNumbers.join(', ')}`);
   }
 
-  return filteredNumbers.reduce((sum, num) => sum + num, 0);
+  // Filter out numbers greater than 1000
+  const validNumbers = filteredNumbers.filter(num => num <= 1000);
+
+  return validNumbers.reduce((sum, num) => sum + num, 0);
 }
 
 // Test cases
@@ -36,6 +39,7 @@ console.log(add("1\n2\n3\n4,5")); // Output: 15
 console.log(add("//;\n1;2")); // Output: 3
 console.log(add("//|\n1|2|3")); // Output: 6
 console.log(add("//sep\n2sep3")); // Output: 5
+console.log(add("2,1001")); // Output: 2
 try {
   console.log(add("1,-2,3")); // Throws error: negative numbers not allowed: -2
 } catch (e) {
