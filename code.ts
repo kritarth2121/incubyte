@@ -3,15 +3,26 @@ function add(numbers: string): number {
       return 0;
   }
 
-  let delimiter = ',';
+  let delimiters = [','];
   if (numbers.startsWith('//')) {
       const delimiterEndIndex = numbers.indexOf('\n');
-      delimiter = numbers.substring(2, delimiterEndIndex);
+      const delimiterPart = numbers.substring(2, delimiterEndIndex);
       numbers = numbers.substring(delimiterEndIndex + 1);
+
+      // Extract delimiters enclosed in square brackets
+      const delimiterMatches = delimiterPart.match(/\[(.*?)\]/g);
+      if (delimiterMatches) {
+          delimiters = delimiterMatches.map(del => del.slice(1, -1));
+      } else {
+          delimiters = [delimiterPart];
+      }
   }
 
-  // Replace new lines with the delimiter and split the string
-  const numberArray = numbers.replace(/\n/g, delimiter).split(delimiter).map(num => parseInt(num, 10));
+  // Create a regex to replace all delimiters with commas
+  const delimiterRegex = new RegExp(delimiters.map(del => escapeRegExp(del)).join('|'), 'g');
+  numbers = numbers.replace(/\n/g, ',').replace(delimiterRegex, ',');
+
+  const numberArray = numbers.split(',').map(num => parseInt(num, 10));
 
   // Filter out any NaN values that may result from parsing non-numeric strings
   const filteredNumbers = numberArray.filter(num => !isNaN(num));
@@ -28,6 +39,11 @@ function add(numbers: string): number {
   return validNumbers.reduce((sum, num) => sum + num, 0);
 }
 
+// Utility function to escape special characters in delimiter strings
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 // Test cases
 console.log(add("")); // Output: 0
 console.log(add("1")); // Output: 1
@@ -40,6 +56,9 @@ console.log(add("//;\n1;2")); // Output: 3
 console.log(add("//|\n1|2|3")); // Output: 6
 console.log(add("//sep\n2sep3")); // Output: 5
 console.log(add("2,1001")); // Output: 2
+console.log(add("//[*][%]\n1*2%3")); // Output: 6
+console.log(add("//[***]\n1***2***3")); // Output: 6
+console.log(add("//[***][%%%]\n1***2%%%3")); // Output: 6
 try {
   console.log(add("1,-2,3")); // Throws error: negative numbers not allowed: -2
 } catch (e) {
